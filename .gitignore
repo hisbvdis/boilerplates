@@ -1,0 +1,26 @@
+# Файлы и папки операционной системы
+**/.DS_Store
+**/Thumbs.db
+
+# Файлы редакторов кода
+**/.idea
+**/*.sublime*
+**/.vscode
+
+# Сборки
+**/public/
+**/build/
+**/app
+
+# Макеты
+**/*.ai
+**/*.pdf
+**/*.psd
+
+# Другое
+**/*.log
+**/node_modules
+**/.cache
+**/.eslintcache
+**/npm-debug.log*
+**/package-lock.json

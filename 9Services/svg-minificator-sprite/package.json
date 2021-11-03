@@ -1,0 +1,22 @@
+{
+  "name": "svg-mini-sprite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "browser-sync": "^2.27.5",
+    "dev-ip": "^1.0.1",
+    "gulp": "^4.0.2",
+    "gulp-svgmin": "^4.0.1",
+    "gulp-svgstore": "^8.0.0"
+  },
+  "devDependencies": {
+    "gulp-rename": "^2.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
