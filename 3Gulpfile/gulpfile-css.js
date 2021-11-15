@@ -6,7 +6,6 @@
 // - gulp build: Build prod server
 
 
-
 // =================================================================
 // PACKAGES
 // =================================================================
@@ -18,21 +17,29 @@ const browsersync = require("browser-sync").create();
 const devip = require("dev-ip");
 const run = require("gulp-run");
 
-// STYLES
-// npm i -D  gulp-postcss  postcss-custom-media  postcss-import  autoprefixer  postcss-csso  gulp-sourcemaps
-const postcss = require("gulp-postcss");
-const postcssCustomMedia = require('postcss-custom-media');
-
 // HTML
 // npm i -D  gulp-htmlmin
 const htmlmin = require("gulp-htmlmin");
 
+// STYLES
+// npm i -D  gulp-postcss  postcss-custom-media  postcss-import  autoprefixer  postcss-csso
+const postcss = require("gulp-postcss");
+const postcssCustomMedia = require('postcss-custom-media');
+
+// IMAGES - RASTER
+// npm i -D  gulp-squoosh
+const gulpSquoosh = require("gulp-squoosh");
+
+// IMAGES - SVG
+// npm i -D  gulp-svgstore  gulp-svgmin
+const svgstore = require("gulp-svgstore");
+const svgmin = require("gulp-svgmin");
+
 // FILES
-// npm i -D  gulp-rename  gulp-clean
+// npm i -D  gulp-rename  gulp-clean  gulp-sourcemaps
 const rename = require("gulp-rename");
 const clean = require("gulp-clean");
 const sourcemaps = require('gulp-sourcemaps');
-
 
 
 
@@ -52,6 +59,9 @@ gulp.task("default", function() {
   gulp.watch("src/*.html").on("change", browsersync.reload);
   gulp.watch("src/css/**/*.css").on("change", gulp.series("dev-styles", browsersync.reload));
   gulp.watch("src/js/**/*.js").on("change", browsersync.reload);
+  gulp.watch("src/img/svg-1-inbox/*.svg").on("add", gulp.series("svg-min"));
+  gulp.watch("src/img/svg-3-sprite/").on("all", gulp.series("svg-sprite"));
+  gulp.watch("src/img/img-1-inbox/*.*").on("add", gulp.series("image-min"));
 });
 
 // Prod server
@@ -66,9 +76,11 @@ gulp.task("prod", function() {
 });
 
 
+
 // =================================================================
 // TASKS (DEV)
 // =================================================================
+// CSS Custom Media
 gulp.task("dev-styles", function() {
   return gulp.src("./src/css/style.css")
     .pipe(sourcemaps.init())
@@ -76,10 +88,44 @@ gulp.task("dev-styles", function() {
         require('postcss-import'),
         postcssCustomMedia()
       ]))
-    .pipe(rename("bundle.css"))
     .pipe(sourcemaps.write())
+    .pipe(rename("bundle.css"))
     .pipe(gulp.dest("src/css/"))
 })
+
+// SVG minification
+gulp.task("svg-min", function() {
+  return gulp
+    .src("src/img/svg-1-inbox/*.svg")
+    .pipe(svgmin({
+      plugins: [{ name: 'removeViewBox', active: false }]
+    }))
+    .pipe(gulp.dest("src/img/svg-2-minified"));
+});
+
+
+// SVG sprite-generator
+gulp.task("svg-sprite", function() {
+  return gulp
+    .src("src/img/svg-3-sprite/*.svg")
+    .pipe(svgstore())
+    .pipe(rename("sprite.svg"))
+    .pipe(gulp.dest("src/img/"));
+});
+
+// Image minification
+gulp.task("image-min", function() {
+  return gulp
+    .src("./src/img/img-1-inbox/**")
+    .pipe(
+      gulpSquoosh(() => ({
+        encodeOptions: {
+          webp: {},
+        },
+      }))
+    )
+    .pipe(gulp.dest("src/img/img-2-minified"));
+});
 
 
 // =================================================================

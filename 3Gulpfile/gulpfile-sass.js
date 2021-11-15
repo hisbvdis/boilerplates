@@ -11,7 +11,8 @@
 // PACKAGES
 // =================================================================
 // SERVICE
-// npm i -D  gulp  browser-sync  dev-ip
+// npm i -g gulp-cli
+// npm i -D  gulp  browser-sync  dev-ip  gulp-run
 const gulp = require("gulp");
 const browsersync = require("browser-sync").create();
 const devip = require("dev-ip");
@@ -21,25 +22,25 @@ const run = require("gulp-run");
 // npm i -D  gulp-htmlmin
 const htmlmin = require("gulp-htmlmin");
 
-// STYLES
-// npm i -D  sass  gulp-sass  gulp-sourcemaps
-const sass = require("gulp-sass")(require("sass"));
-const sourcemaps = require("gulp-sourcemaps");
-
 // STYLES (CSS)
-// npm i -D  postcss  gulp-postcss  postcss-import  autoprefixer  postcss-csso
-const postcss = require('gulp-postcss');
+// npm i -D  sass  gulp-sass  gulp-postcss  autoprefixer  postcss-csso
+const sass = require("gulp-sass")(require("sass"));
+const postcss = require("gulp-postcss");
 
-// IMAGES
-// npm i -D  gulp-svgmin  gulp-svgstore  gulp-imagemin
-const svgmin = require("gulp-svgmin");
+// IMAGES (RASTER)
+// npm i -D  gulp-squoosh
+const gulpSquoosh = require("gulp-squoosh");
+
+// IMAGES (SVG)
+// npm i -D  gulp-svgstore  gulp-svgmin
 const svgstore = require("gulp-svgstore");
-const imagemin = require("gulp-imagemin");
+const svgmin = require("gulp-svgmin");
 
 // FILES
-// npm i -D  gulp-rename  gulp-clean
+// npm i -D  gulp-rename  gulp-clean  gulp-sourcemaps
 const rename = require("gulp-rename");
 const clean = require("gulp-clean");
+const sourcemaps = require('gulp-sourcemaps');
 
 
 
@@ -50,25 +51,25 @@ const clean = require("gulp-clean");
 gulp.task("default", function() {
   browsersync.init({
     server: "src",
-    host: devip(), // From "dev-ip" extension
+    host: devip(),
     reloadDelay: 0,
     reloadDebounce: 100,
     notify: false,
   });
 
-  gulp.watch("src/sass/**/*.scss", gulp.series("sass"));
   gulp.watch("src/*.html").on("change", browsersync.reload);
+  gulp.watch("src/sass/**/*.scss", gulp.series("sass-compile"));
   gulp.watch("src/js/**/*.js").on("change", browsersync.reload);
-  gulp.watch("src/img/svg-1-inbox/*.svg").on("add", gulp.series("svgmin"));
+  gulp.watch("src/img/svg-1-inbox/*.svg").on("add", gulp.series("svg-min"));
   gulp.watch("src/img/svg-3-sprite/").on("all", gulp.series("svg-sprite"));
-  gulp.watch("src/img/imgInbox/*.*").on("add", gulp.series("image-min"));
+  gulp.watch("src/img/img-1-inbox/*.*").on("add", gulp.series("image-min"));
 });
 
 // Prod server
 gulp.task("prod", function() {
   browsersync.init({
     server: "build",
-    host: devip(), // From "dev-ip" extension
+    host: devip(),
     reloadDelay: 0,
     reloadDebounce: 100,
     notify: false,
@@ -81,23 +82,27 @@ gulp.task("prod", function() {
 // TASKS (DEV)
 // =================================================================
 // SASS compilation
-gulp.task("sass", function() {
+gulp.task("sass-compile", function() {
   return gulp
-    .src("src/sass/**/*.scss") /* или "main.scss" ???? */
+    .src("src/sass/style.scss")
     .pipe(sourcemaps.init())
     .pipe(sass())
     .pipe(sourcemaps.write())
+    .pipe(rename("bundle.css"))
     .pipe(gulp.dest("src/css"))
     .pipe(browsersync.stream());
 });
 
 // SVG minification
-gulp.task("svgmin", function() {
+gulp.task("svg-min", function() {
   return gulp
     .src("src/img/svg-1-inbox/*.svg")
-    .pipe(svgmin())
+    .pipe(svgmin({
+      plugins: [{ name: 'removeViewBox', active: false }]
+    }))
     .pipe(gulp.dest("src/img/svg-2-minified"));
 });
+
 
 // SVG sprite-generator
 gulp.task("svg-sprite", function() {
@@ -111,16 +116,16 @@ gulp.task("svg-sprite", function() {
 // Image minification
 gulp.task("image-min", function() {
   return gulp
-    .src([
-      "src/img/img-1-inbox/*.jpg",
-      "src/img/img-1-inbox/*.jpeg",
-      "src/img/img-1-inbox/*.png",
-      "src/img/img-1-inbox/*.gif",
-    ])
-    .pipe(imagemin())
+    .src("./src/img/img-1-inbox/**")
+    .pipe(
+      gulpSquoosh(() => ({
+        encodeOptions: {
+          webp: {},
+        },
+      }))
+    )
     .pipe(gulp.dest("src/img/img-2-minified"));
 });
-
 
 
 // =================================================================
@@ -143,9 +148,8 @@ gulp.task("build-html", function() {
 
 // Build step 2: CSS bundle + autoprefixer + min + transfer
 gulp.task('build-styles', () => {
-  return gulp.src('src/css/style.css')
+  return gulp.src('src/css/bundle.css')
       .pipe(postcss([
-          require('postcss-import'),
           require('autoprefixer'),
           require('postcss-csso'),
       ]))
