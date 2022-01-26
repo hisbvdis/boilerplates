@@ -7,11 +7,6 @@ Thumbs.db
 *.sublime*
 .vscode
 
-# Папки собранных проектов
-public/
-build/
-app/
-
 # Макеты
 *.ai
 *.pdf
@@ -26,3 +21,8 @@ package-lock.json
 *.log
 .cache
 .eslintcache
+
+# Папки собранных проектов
+# public/
+# build/
+# app/
