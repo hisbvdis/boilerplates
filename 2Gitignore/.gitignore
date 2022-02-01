@@ -8,9 +8,9 @@ Thumbs.db
 .vscode
 
 # Макеты
-*.ai
-*.pdf
-*.psd
+# *.ai
+# *.pdf
+# *.psd
 
 # NPM и Node
 node_modules
