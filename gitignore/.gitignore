@@ -15,7 +15,6 @@ Thumbs.db
 # NPM и Node
 node_modules
 npm-debug.log*
-package-lock.json
 
 # Другое
 *.log
