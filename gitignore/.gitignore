@@ -13,8 +13,9 @@ Thumbs.db
 # *.psd
 
 # NPM и Node
-node_modules
+node_modules/
 npm-debug.log*
+*.log
 
 # Другое
 *.log
@@ -25,3 +26,6 @@ npm-debug.log*
 # public/
 # build/
 # app/
+
+# Локальные файлы конфигураций
+.env
